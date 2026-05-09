@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodingHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Clash+Display:wght@500;600;700&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">Coding<span>Hub</span></a>
+  <ul class="nav-links">
+    <li><a href="#languages">Languages</a></li>
+    <li><a href="notes.html">Notes</a></li>
+    <li><a href="codes.html">Code Library</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <a href="notes.html" class="nav-cta">Start Learning →</a>
+  <div class="hamburger" id="ham"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-badge"><i class="fa fa-circle-dot"></i> Free · Open · Complete Notes</div>
+  <h1>Learn to Code<br><span class="line2">The Right Way</span></h1>
+  <p class="hero-sub">Complete notes, code examples, and an AI tutor — all in one place. Learn HTML, CSS, JavaScript, Python, SQL and more.</p>
+  <div class="hero-actions">
+    <a href="notes.html" class="btn-primary">Explore Notes</a>
+    <a href="codes.html" class="btn-secondary"><i class="fa fa-code"></i> Code Library</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-n">8+</div><div class="stat-l">Languages</div></div>
+    <div class="stat"><div class="stat-n">500+</div><div class="stat-l">Code Snippets</div></div>
+    <div class="stat"><div class="stat-n">AI</div><div class="stat-l">Chatbot Tutor</div></div>
+    <div class="stat"><div class="stat-n">Free</div><div class="stat-l">Always</div></div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div style="max-width:900px;margin:0 auto;padding:0 20px;">
+  <p class="search-heading">// search for a topic or language</p>
+  <div class="search-box">
+    <i class="fa fa-magnifying-glass"></i>
+    <input type="text" id="searchInput" placeholder="e.g. JavaScript arrays, Python loops, SQL JOIN...">
+    <button class="search-btn" onclick="doSearch()">Search</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- LANGUAGES -->
+<div class="section" id="languages">
+  <p class="section-label">// languages</p>
+  <h2 class="section-title">Pick Your Path</h2>
+  <p class="section-sub">From beginner to advanced — full notes and code examples for every language.</p>
+
+  <div class="lang-grid">
+
+    <a href="notes.html?lang=html" class="lang-card" style="--card-color:#f06529;--card-accent:rgba(240,101,41,.1);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🌐</span>
+      <div class="lang-name">HTML</div>
+      <div class="lang-desc">Structure of the web. Tags, forms, semantic elements and everything you need to build pages.</div>
+      <div class="lang-meta"><span class="lang-tag">Beginner</span><span class="lang-tag">Web</span></div>
+    </a>
+
+    <a href="notes.html?lang=css" class="lang-card" style="--card-color:#264de4;--card-accent:rgba(38,77,228,.1);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🎨</span>
+      <div class="lang-name">CSS</div>
+      <div class="lang-desc">Style, layout, animations and responsive design. Flexbox, Grid, transitions and more.</div>
+      <div class="lang-meta"><span class="lang-tag">Beginner</span><span class="lang-tag">Design</span></div>
+    </a>
+
+    <a href="notes.html?lang=js" class="lang-card" style="--card-color:#f7df1e;--card-accent:rgba(247,223,30,.08);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">⚡</span>
+      <div class="lang-name">JavaScript</div>
+      <div class="lang-desc">Core JS, DOM, ES6+, Promises, Async/Await, Arrays, Objects, Events and more.</div>
+      <div class="lang-meta"><span class="lang-tag">Intermediate</span><span class="lang-tag">Web</span></div>
+    </a>
+
+    <a href="notes.html?lang=js-advanced" class="lang-card" style="--card-color:#ff6584;--card-accent:rgba(255,101,132,.1);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🚀</span>
+      <div class="lang-name">JS Advanced</div>
+      <div class="lang-desc">Closures, Prototypes, Event Loop, Modules, Design Patterns, APIs, Fetch, JSON.</div>
+      <div class="lang-meta"><span class="lang-tag">Advanced</span><span class="lang-tag">Web</span></div>
+    </a>
+
+    <a href="notes.html?lang=python" class="lang-card" style="--card-color:#3572A5;--card-accent:rgba(53,114,165,.1);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🐍</span>
+      <div class="lang-name">Python</div>
+      <div class="lang-desc">Variables, loops, functions, OOP, file handling — Python from scratch to fluent.</div>
+      <div class="lang-meta"><span class="lang-tag">Beginner</span><span class="lang-tag">General</span></div>
+    </a>
+
+    <a href="notes.html?lang=python-advanced" class="lang-card" style="--card-color:#43e97b;--card-accent:rgba(67,233,123,.08);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🤖</span>
+      <div class="lang-name">Python Advanced</div>
+      <div class="lang-desc">Decorators, Generators, Async, ML basics with NumPy, Pandas, scikit-learn.</div>
+      <div class="lang-meta"><span class="lang-tag">Advanced</span><span class="lang-tag">AI/ML</span></div>
+    </a>
+
+    <a href="notes.html?lang=sql" class="lang-card" style="--card-color:#38bdf8;--card-accent:rgba(56,189,248,.08);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">🗄️</span>
+      <div class="lang-name">SQL</div>
+      <div class="lang-desc">SELECT, JOIN, GROUP BY, subqueries, indexes, and database design fundamentals.</div>
+      <div class="lang-meta"><span class="lang-tag">Intermediate</span><span class="lang-tag">Database</span></div>
+    </a>
+
+    <a href="notes.html?lang=sql-advanced" class="lang-card" style="--card-color:#f7971e;--card-accent:rgba(247,151,30,.08);">
+      <i class="fa fa-arrow-up-right-from-square lang-arrow"></i>
+      <span class="lang-icon">⚙️</span>
+      <div class="lang-name">SQL Advanced</div>
+      <div class="lang-desc">Window functions, CTEs, stored procedures, triggers, optimization and transactions.</div>
+      <div class="lang-meta"><span class="lang-tag">Advanced</span><span class="lang-tag">Database</span></div>
+    </a>
+
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features" style="background:var(--bg2);max-width:100%;padding:100px 20px;">
+<div style="max-width:1200px;margin:0 auto;">
+  <p class="section-label">// features</p>
+  <h2 class="section-title">Everything You Need</h2>
+  <p class="section-sub">Built for students who want to learn fast and remember more.</p>
+  <div class="features-grid">
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(108,99,255,.1);color:var(--accent);"><i class="fa fa-book-open"></i></div>
+      <div class="feat-title">Complete Notes</div>
+      <div class="feat-desc">Structured, beginner-friendly notes for every topic. From basics to advanced — all in one place.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(67,233,123,.1);color:var(--accent3);"><i class="fa fa-code"></i></div>
+      <div class="feat-title">Code Library</div>
+      <div class="feat-desc">Hundreds of ready-to-use code snippets. One-click copy. Organized by language and topic.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(56,189,248,.1);color:var(--cyan);"><i class="fa fa-robot"></i></div>
+      <div class="feat-title">AI Chatbot Tutor</div>
+      <div class="feat-desc">Ask anything about coding. The AI is trained specifically on CodingHub topics and examples.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(247,151,30,.1);color:var(--accent4);"><i class="fa fa-magnifying-glass"></i></div>
+      <div class="feat-title">Smart Search</div>
+      <div class="feat-desc">Find any topic across all languages instantly. Search by keyword, concept, or example type.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(255,101,132,.1);color:var(--accent2);"><i class="fa fa-mobile-screen"></i></div>
+      <div class="feat-title">Mobile Friendly</div>
+      <div class="feat-desc">Learn on any device. Fully responsive design that looks great on phone, tablet and desktop.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(108,99,255,.1);color:var(--accent);"><i class="fa fa-bolt"></i></div>
+      <div class="feat-title">Always Free</div>
+      <div class="feat-desc">No paywalls, no sign-up required. All notes and code examples are completely free forever.</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ── OPERATOR + CONTACT SECTION ── -->
+<section class="contact-section" id="contact">
+
+  <!-- LEFT: OPERATOR -->
+  <div class="operator-card">
+    <div class="operator-avatar">👩‍💻</div>
+    <h2 class="operator-name">Premamoyee</h2>
+    <p class="operator-role">Founder · CodingHub</p>
+
+    <p class="operator-desc">
+      Passionate developer building CodingHub to help students learn coding the right way.
+      Always open to collaboration, ideas, and opportunities.
+    </p>
+
+    <a href="https://premomayee.netlify.app/" target="_blank" class="operator-btn">
+      Visit Portfolio
+    </a>
+  </div>
+
+  <!-- RIGHT: CONTACT FORM -->
+<div class="contact-card">
+  <h2>Contact Me</h2>
+
+  <form id="contact-form">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+
+    <button type="submit">Send Message</button>
+  </form>
+</div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">Coding<span>Hub</span></div>
+      <p class="footer-tagline">Your complete free coding education platform. Learn, practice, grow.</p>
+    </div>
+    <div>
+      <div class="footer-heading">Learn</div>
+      <ul class="footer-links">
+        <li><a href="notes.html?lang=html">HTML Notes</a></li>
+        <li><a href="notes.html?lang=css">CSS Notes</a></li>
+        <li><a href="notes.html?lang=js">JavaScript</a></li>
+        <li><a href="notes.html?lang=python">Python</a></li>
+        <li><a href="notes.html?lang=sql">SQL</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Resources</div>
+      <ul class="footer-links">
+        <li><a href="codes.html">Code Library [ APNA COLLEGE ] </a></li>
+        <li><a href="notes.html">All Notes</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Connect</div>
+      <ul class="footer-links">
+        <li><a href="https://premomayee.netlify.app/" target="_blank">My Portfolio</a></li>
+        <li><a href="https://github.com/premo997">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/premo997/">Linkedin</a></li>
+        <li><a href="https://www.instagram.com/_premo_997">Instagram</a></li>
+        <li><a href="https://x.com/Premomayee39512">Twitter</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+<div class="footer-bottom">
+  <span class="footer-copy">
+    © 2026 CodingHub · All rights reserved.  
+    Made with 💙 by <strong class="owner-name">Premamoyee</strong><br>
+    <span class="license-text">
+      ⚠️ This project is for educational purposes only. Commercial use, redistribution, or resale is strictly prohibited without permission.
+    </span>
+  </span>
+
+  <div class="footer-socials">
+    <a href="https://github.com/premo997" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://www.linkedin.com/in/premo997/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.instagram.com/_premo_997" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://x.com/Premomayee39512" target="_blank"><i class="fab fa-twitter"></i></a>
+  </div>
+</div>
+</footer>
+
+<!-- CHATBOT BUTTON -->
+<button id="chatbot-btn" onclick="toggleChat()" title="AI Tutor"><i class="fa fa-robot"></i></button>
+
+<!-- CHATBOT WINDOW -->
+<div id="chatbot-window">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar"><i class="fa fa-robot"></i></div>
+      <div>
+        <div class="chat-name">CodeBot</div>
+        <div class="chat-status">🟢 Online · AI Tutor</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()"><i class="fa fa-xmark"></i></button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg bot">👋 Hi! I'm <strong>CodeBot</strong>, your AI coding tutor. Ask me anything about HTML, CSS, JavaScript, Python, or SQL!</div>
+    <div class="msg bot">Try: <em>"What is a for loop in Python?"</em> or <em>"Explain CSS flexbox"</em></div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Ask a coding question..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="chat-send" onclick="sendMsg()"><i class="fa fa-paper-plane"></i></button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

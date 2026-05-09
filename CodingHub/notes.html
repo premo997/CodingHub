@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes — CodingHub</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;
+  --border:rgba(255,255,255,.07);--text:#f0f0f8;--muted:#7a7a99;
+  --accent:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--accent4:#f7971e;--cyan:#38bdf8;
+  --code-bg:#0d1117;
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Satoshi',sans-serif;display:flex;min-height:100vh;cursor:none;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--accent);}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(108,99,255,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .14s;}
+
+/* SIDEBAR */
+.sidebar{
+  width:280px;min-height:100vh;
+  background:var(--bg2);border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;overflow-y:auto;
+  padding:24px 16px;
+  display:flex;flex-direction:column;gap:8px;
+  z-index:100;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.sidebar-logo{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);font-size:1.05rem;padding:8px 12px;margin-bottom:8px;text-decoration:none;display:block;}
+.sidebar-logo span{color:var(--accent2);}
+.sidebar-search{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:9px 14px;display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.sidebar-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:.83rem;font-family:'Satoshi',sans-serif;width:100%;}
+.sidebar-search input::placeholder{color:var(--muted);}
+.sidebar-search i{color:var(--muted);font-size:.8rem;}
+
+.lang-group{margin-bottom:4px;}
+.lang-group-btn{
+  width:100%;text-align:left;background:transparent;border:none;
+  color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  transition:color .2s;border-radius:8px;
+}
+.lang-group-btn:hover,.lang-group-btn.active{color:var(--text);background:rgba(255,255,255,.04);}
+.lang-group-btn.active{color:var(--accent);}
+.topic-list{display:none;padding-left:8px;}
+.topic-list.open{display:block;}
+.topic-item{
+  display:block;padding:7px 12px;border-radius:8px;font-size:.84rem;
+  color:var(--muted);text-decoration:none;cursor:pointer;
+  transition:background .15s,color .15s;border:none;background:transparent;
+  width:100%;text-align:left;
+}
+.topic-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.topic-item.active{background:rgba(108,99,255,.12);color:var(--accent);}
+
+/* MAIN */
+.main{margin-left:280px;flex:1;padding:40px 48px;max-width:900px;}
+.breadcrumb{font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:28px;display:flex;gap:8px;align-items:center;}
+.breadcrumb a{color:var(--accent);text-decoration:none;}
+.notes-header{margin-bottom:40px;}
+.notes-lang-badge{display:inline-flex;align-items:center;gap:8px;font-size:.73rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.2);padding:5px 14px;border-radius:50px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;}
+.notes-title{font-size:2rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1.2;margin-bottom:12px;}
+.notes-desc{color:var(--muted);font-size:.95rem;line-height:1.8;}
+
+/* NOTE CONTENT */
+.note-section{margin-bottom:56px;}
+.note-section h2{font-size:1.3rem;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.note-section h2 .num{color:var(--accent);font-size:1rem;}
+.note-section h3{font-size:1rem;font-weight:700;margin:20px 0 10px;color:var(--cyan);}
+.note-section p{color:rgba(240,240,248,.8);line-height:1.85;font-size:.95rem;margin-bottom:12px;}
+.note-section ul{padding-left:20px;margin-bottom:12px;}
+.note-section li{color:rgba(240,240,248,.8);line-height:1.85;font-size:.95rem;margin-bottom:4px;}
+.note-section li::marker{color:var(--accent);}
+.tip{background:rgba(67,233,123,.06);border-left:3px solid var(--accent3);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:.9rem;color:rgba(240,240,248,.85);}
+.tip strong{color:var(--accent3);}
+.warn{background:rgba(255,101,132,.06);border-left:3px solid var(--accent2);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:.9rem;}
+.warn strong{color:var(--accent2);}
+
+/* CODE BLOCK */
+.code-block{position:relative;margin:16px 0;}
+.code-block pre{
+  background:var(--code-bg);border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;padding:20px 20px 20px 20px;overflow-x:auto;
+  font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;
+  color:#c9d1d9;
+}
+.code-block .copy-btn{
+  position:absolute;top:10px;right:10px;
+  background:rgba(108,99,255,.2);border:1px solid rgba(108,99,255,.3);
+  color:var(--accent);border-radius:6px;padding:4px 10px;font-size:.72rem;
+  cursor:pointer;font-family:'JetBrains Mono',monospace;transition:.2s;
+}
+.code-block .copy-btn:hover{background:rgba(108,99,255,.4);}
+.code-block .lang-label{
+  position:absolute;top:10px;left:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+}
+.code-block pre{padding-top:32px;}
+/* syntax highlight colors */
+.kw{color:#ff79c6;}
+.fn{color:#50fa7b;}
+.str{color:#f1fa8c;}
+.cm{color:#6272a4;}
+.num{color:#bd93f9;}
+.tag{color:#ff5555;}
+.attr{color:#ffb86c;}
+
+/* NAV BAR TOP */
+.topbar{
+  position:fixed;top:0;left:280px;right:0;height:56px;
+  background:rgba(10,10,15,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);z-index:99;
+  display:flex;align-items:center;padding:0 48px;justify-content:space-between;
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.topbar a{color:var(--muted);text-decoration:none;font-size:.85rem;transition:.2s;}
+.topbar a:hover{color:var(--text);}
+.topbar-right{display:flex;gap:12px;}
+.topbar-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 16px;border-radius:8px;font-size:.8rem;cursor:pointer;text-decoration:none;transition:.2s;font-family:'Satoshi',sans-serif;}
+.topbar-btn:hover{border-color:var(--accent);color:var(--accent);}
+.topbar-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* CONTENT WRAPPER */
+.content-area{padding-top:56px;}
+
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .main{margin-left:0;padding:24px 20px;}
+  .topbar{left:0;}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">Coding<span>Hub</span></a>
+  <div class="sidebar-search">
+    <i class="fa fa-magnifying-glass"></i>
+    <input type="text" id="sideSearch" placeholder="Search topics...">
+  </div>
+
+  <!-- HTML -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'html-topics')">🌐 HTML <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="html-topics">
+      <button class="topic-item" onclick="showNotes('html','intro')">Introduction</button>
+      <button class="topic-item" onclick="showNotes('html','tags')">Basic Tags</button>
+      <button class="topic-item" onclick="showNotes('html','forms')">Forms & Inputs</button>
+      <button class="topic-item" onclick="showNotes('html','tables')">Tables</button>
+      <button class="topic-item" onclick="showNotes('html','semantic')">Semantic HTML</button>
+      <button class="topic-item" onclick="showNotes('html','media')">Images & Media</button>
+      <button class="topic-item" onclick="showNotes('html','links')">Links & Navigation</button>
+    </div>
+  </div>
+
+  <!-- CSS -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'css-topics')">🎨 CSS <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="css-topics">
+      <button class="topic-item" onclick="showNotes('css','intro')">Introduction</button>
+      <button class="topic-item" onclick="showNotes('css','selectors')">Selectors</button>
+      <button class="topic-item" onclick="showNotes('css','box')">Box Model</button>
+      <button class="topic-item" onclick="showNotes('css','flex')">Flexbox</button>
+      <button class="topic-item" onclick="showNotes('css','grid')">CSS Grid</button>
+      <button class="topic-item" onclick="showNotes('css','animations')">Animations</button>
+      <button class="topic-item" onclick="showNotes('css','responsive')">Responsive Design</button>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'js-topics')">⚡ JavaScript <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="js-topics">
+      <button class="topic-item" onclick="showNotes('js','intro')">Introduction</button>
+      <button class="topic-item" onclick="showNotes('js','variables')">Variables & Types</button>
+      <button class="topic-item" onclick="showNotes('js','functions')">Functions</button>
+      <button class="topic-item" onclick="showNotes('js','arrays')">Arrays</button>
+      <button class="topic-item" onclick="showNotes('js','objects')">Objects</button>
+      <button class="topic-item" onclick="showNotes('js','dom')">DOM Manipulation</button>
+      <button class="topic-item" onclick="showNotes('js','events')">Events</button>
+      <button class="topic-item" onclick="showNotes('js','async')">Async / Promises</button>
+      <button class="topic-item" onclick="showNotes('js','es6')">ES6+ Features</button>
+    </div>
+  </div>
+
+  <!-- JS Advanced -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'jsa-topics')">🚀 JS Advanced <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="jsa-topics">
+      <button class="topic-item" onclick="showNotes('jsa','closures')">Closures</button>
+      <button class="topic-item" onclick="showNotes('jsa','prototype')">Prototypes</button>
+      <button class="topic-item" onclick="showNotes('jsa','eventloop')">Event Loop</button>
+      <button class="topic-item" onclick="showNotes('jsa','modules')">Modules</button>
+      <button class="topic-item" onclick="showNotes('jsa','fetch')">Fetch API & JSON</button>
+    </div>
+  </div>
+
+  <!-- Python -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'py-topics')">🐍 Python <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="py-topics">
+      <button class="topic-item" onclick="showNotes('py','intro')">Introduction</button>
+      <button class="topic-item" onclick="showNotes('py','variables')">Variables & Types</button>
+      <button class="topic-item" onclick="showNotes('py','control')">Control Flow</button>
+      <button class="topic-item" onclick="showNotes('py','functions')">Functions</button>
+      <button class="topic-item" onclick="showNotes('py','lists')">Lists & Tuples</button>
+      <button class="topic-item" onclick="showNotes('py','dicts')">Dictionaries</button>
+      <button class="topic-item" onclick="showNotes('py','oop')">OOP & Classes</button>
+      <button class="topic-item" onclick="showNotes('py','fileio')">File I/O</button>
+    </div>
+  </div>
+
+  <!-- Python Advanced -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'pya-topics')">🤖 Python Advanced <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="pya-topics">
+      <button class="topic-item" onclick="showNotes('pya','decorators')">Decorators</button>
+      <button class="topic-item" onclick="showNotes('pya','generators')">Generators</button>
+      <button class="topic-item" onclick="showNotes('pya','async')">Async Programming</button>
+      <button class="topic-item" onclick="showNotes('pya','numpy')">NumPy Basics</button>
+      <button class="topic-item" onclick="showNotes('pya','pandas')">Pandas Basics</button>
+    </div>
+  </div>
+
+  <!-- SQL -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'sql-topics')">🗄️ SQL <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="sql-topics">
+      <button class="topic-item" onclick="showNotes('sql','intro')">Introduction</button>
+      <button class="topic-item" onclick="showNotes('sql','select')">SELECT & WHERE</button>
+      <button class="topic-item" onclick="showNotes('sql','joins')">JOINs</button>
+      <button class="topic-item" onclick="showNotes('sql','group')">GROUP BY & HAVING</button>
+      <button class="topic-item" onclick="showNotes('sql','crud')">INSERT / UPDATE / DELETE</button>
+      <button class="topic-item" onclick="showNotes('sql','constraints')">Constraints & Keys</button>
+    </div>
+  </div>
+
+  <!-- SQL Advanced -->
+  <div class="lang-group">
+    <button class="lang-group-btn" onclick="toggleGroup(this,'sqla-topics')">⚙️ SQL Advanced <i class="fa fa-chevron-right" style="font-size:.6rem"></i></button>
+    <div class="topic-list" id="sqla-topics">
+      <button class="topic-item" onclick="showNotes('sqla','window')">Window Functions</button>
+      <button class="topic-item" onclick="showNotes('sqla','cte')">CTEs</button>
+      <button class="topic-item" onclick="showNotes('sqla','stored')">Stored Procedures</button>
+      <button class="topic-item" onclick="showNotes('sqla','indexes')">Indexes</button>
+      <button class="topic-item" onclick="showNotes('sqla','transactions')">Transactions</button>
+    </div>
+  </div>
+</aside>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="index.html"><i class="fa fa-house"></i> Home</a>
+    <span style="color:var(--border)">/</span>
+    <span id="breadLang" style="color:var(--accent);font-size:.85rem;font-family:'JetBrains Mono',monospace;">Notes</span>
+  </div>
+  <div class="topbar-right">
+    <a href="codes.html" class="topbar-btn">Code Library</a>
+    <button class="topbar-btn active" id="chatToggleTop" onclick="toggleChatTop()">💬 Ask CodeBot</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main content-area" id="mainContent">
+  <div class="notes-header">
+    <div class="notes-lang-badge"><i class="fa fa-book-open"></i> Complete Notes</div>
+    <h1 class="notes-title">Welcome to CodingHub Notes</h1>
+    <p class="notes-desc">Select a language and topic from the sidebar to start learning. All notes include explanations, examples, and code snippets.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:40px;">
+    <div onclick="showNotes('html','intro')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#f06529'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">🌐</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">HTML</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">7 topics</div>
+    </div>
+    <div onclick="showNotes('css','intro')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#264de4'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">🎨</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">CSS</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">7 topics</div>
+    </div>
+    <div onclick="showNotes('js','intro')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#f7df1e'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">⚡</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">JavaScript</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">9 topics</div>
+    </div>
+    <div onclick="showNotes('py','intro')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#3572A5'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">🐍</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">Python</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">8 topics</div>
+    </div>
+    <div onclick="showNotes('sql','intro')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#38bdf8'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">🗄️</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">SQL</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">6 topics</div>
+    </div>
+    <div onclick="showNotes('pya','decorators')" style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='#43e97b'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:1.8rem;margin-bottom:8px;">🤖</div><div style="font-weight:700;font-family:'JetBrains Mono',monospace;">Py Advanced</div><div style="font-size:.82rem;color:var(--muted);margin-top:4px;">5 topics</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT (same as index) -->
+<button id="chatbot-btn" onclick="toggleChatTop()" title="Ask CodeBot" style="position:fixed;bottom:28px;right:28px;z-index:999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#ff6584);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 4px 20px rgba(108,99,255,.5);transition:transform .2s;">
+  <i class="fa fa-robot"></i>
+</button>
+<div id="chatbot-window" style="position:fixed;bottom:90px;right:28px;z-index:998;width:340px;height:480px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.7);">
+  <div style="padding:14px 18px;background:linear-gradient(135deg,#6c63ff,#8b5cf6);display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;">🤖</div>
+      <div><div style="font-weight:700;font-size:.9rem;">CodeBot</div><div style="font-size:.7rem;opacity:.75;">🟢 AI Tutor</div></div>
+    </div>
+    <button onclick="toggleChatTop()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.75rem;">✕</button>
+  </div>
+  <div id="chatMsgs2" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;">
+    <div style="max-width:85%;padding:10px 14px;border-radius:14px;border-bottom-left-radius:4px;background:var(--bg3);border:1px solid var(--border);font-size:.85rem;line-height:1.6;">👋 Hi! Ask me anything about the topic you're studying!</div>
+  </div>
+  <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+    <input id="chatInput2" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:.84rem;font-family:'Satoshi',sans-serif;outline:none;" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')sendMsg2()">
+    <button onclick="sendMsg2()" style="background:var(--accent);border:none;color:#fff;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:.88rem;">➤</button>
+  </div>
+</div>
+
+<script>
+/* CURSOR */
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let cx=0,cy=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;cur.style.left=cx+'px';cur.style.top=cy+'px';});
+(function animRing(){rx+=(cx-rx)*.12;ry+=(cy-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+
+/* SIDEBAR TOGGLE */
+function toggleGroup(btn,id){
+  const list=document.getElementById(id);
+  const isOpen=list.classList.contains('open');
+  document.querySelectorAll('.topic-list').forEach(l=>l.classList.remove('open'));
+  document.querySelectorAll('.lang-group-btn').forEach(b=>b.classList.remove('active'));
+  if(!isOpen){list.classList.add('open');btn.classList.add('active');}
+}
+
+/* SIDEBAR SEARCH */
+document.getElementById('sideSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  document.querySelectorAll('.topic-item').forEach(item=>{
+    item.style.display=item.textContent.toLowerCase().includes(q)?'block':'none';
+  });
+  if(q){document.querySelectorAll('.topic-list').forEach(l=>l.classList.add('open'));}
+  else{document.querySelectorAll('.topic-list').forEach(l=>l.classList.remove('open'));}
+});
+
+/* ============================================================
+   COMPLETE NOTES DATABASE
+   ============================================================ */
+const notes={
+  html:{
+    intro:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">Introduction to HTML</h1>
+    <p class="notes-desc">HTML stands for HyperText Markup Language. It is the standard language used to create and structure content on the web.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> What is HTML?</h2>
+      <p>HTML uses <strong>tags</strong> (keywords inside angle brackets) to define elements on a page. A browser reads your HTML file and renders it visually for the user.</p>
+      <div class="tip"><strong>💡 Key Point:</strong> HTML is NOT a programming language — it is a markup language. It describes the structure, not the logic.</div>
+      <h3>Basic HTML Document Structure</h3>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang=</span><span class="str">"en"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset=</span><span class="str">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">name=</span><span class="str">"viewport"</span> <span class="attr">content=</span><span class="str">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>My First Page<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>This is my first web page.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre></div>
+      <h3>Anatomy of an HTML Tag</h3>
+      <ul>
+        <li><strong>&lt;tagname&gt;</strong> — Opening tag</li>
+        <li>Content goes here</li>
+        <li><strong>&lt;/tagname&gt;</strong> — Closing tag</li>
+        <li>Some tags are self-closing: <code>&lt;img /&gt;</code>, <code>&lt;br /&gt;</code>, <code>&lt;hr /&gt;</code></li>
+      </ul>
+    </div>`,
+
+    tags:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">HTML Basic Tags</h1>
+    <p class="notes-desc">HTML has dozens of tags for different purposes. Here are the most important ones you'll use daily.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Headings & Text</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">&lt;!-- Headings h1 to h6 --&gt;</span>
+<span class="tag">&lt;h1&gt;</span>Biggest Heading<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;h2&gt;</span>Second Level<span class="tag">&lt;/h2&gt;</span>
+<span class="tag">&lt;h3&gt;</span>Third Level<span class="tag">&lt;/h3&gt;</span>
+<span class="tag">&lt;p&gt;</span>A paragraph of text.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;strong&gt;</span>Bold text<span class="tag">&lt;/strong&gt;</span>
+<span class="tag">&lt;em&gt;</span>Italic text<span class="tag">&lt;/em&gt;</span>
+<span class="tag">&lt;u&gt;</span>Underlined<span class="tag">&lt;/u&gt;</span>
+<span class="tag">&lt;br&gt;</span>  <span class="cm">&lt;!-- Line break --&gt;</span>
+<span class="tag">&lt;hr&gt;</span>  <span class="cm">&lt;!-- Horizontal rule --&gt;</span></pre></div>
+      <h2><span class="num">02</span> Links & Images</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">&lt;!-- Anchor tag --&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"https://google.com"</span> <span class="attr">target=</span><span class="str">"_blank"</span><span class="tag">&gt;</span>Visit Google<span class="tag">&lt;/a&gt;</span>
+
+<span class="cm">&lt;!-- Image tag --&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src=</span><span class="str">"photo.jpg"</span> <span class="attr">alt=</span><span class="str">"My Photo"</span> <span class="attr">width=</span><span class="str">"300"</span><span class="tag">&gt;</span></pre></div>
+      <h2><span class="num">03</span> Lists</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">&lt;!-- Unordered list --&gt;</span>
+<span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Item One<span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Item Two<span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span>
+<span class="cm">&lt;!-- Ordered list --&gt;</span>
+<span class="tag">&lt;ol&gt;</span>
+  <span class="tag">&lt;li&gt;</span>First<span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Second<span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ol&gt;</span></pre></div>
+      <h2><span class="num">04</span> Containers</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;div</span> <span class="attr">class=</span><span class="str">"container"</span><span class="tag">&gt;</span>  <span class="cm">&lt;!-- Block-level container --&gt;</span>
+  <span class="tag">&lt;span&gt;</span>Inline element<span class="tag">&lt;/span&gt;</span>  <span class="cm">&lt;!-- Inline container --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre></div>
+    </div>`,
+
+    forms:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">HTML Forms & Inputs</h1>
+    <p class="notes-desc">Forms allow users to input data and submit it to a server. They're essential for login pages, contact forms, and much more.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Basic Form</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;form</span> <span class="attr">action=</span><span class="str">"/submit"</span> <span class="attr">method=</span><span class="str">"POST"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">for=</span><span class="str">"name"</span><span class="tag">&gt;</span>Your Name:<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"text"</span> <span class="attr">id=</span><span class="str">"name"</span> <span class="attr">name=</span><span class="str">"name"</span> <span class="attr">placeholder=</span><span class="str">"Enter name"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"email"</span> <span class="attr">name=</span><span class="str">"email"</span> <span class="attr">placeholder=</span><span class="str">"Email address"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"password"</span> <span class="attr">name=</span><span class="str">"pass"</span> <span class="attr">placeholder=</span><span class="str">"Password"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;textarea</span> <span class="attr">name=</span><span class="str">"msg"</span> <span class="attr">rows=</span><span class="str">"4"</span> <span class="attr">placeholder=</span><span class="str">"Your message"</span><span class="tag">&gt;&lt;/textarea&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type=</span><span class="str">"submit"</span><span class="tag">&gt;</span>Send<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre></div>
+      <h2><span class="num">02</span> Input Types</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"text"</span><span class="tag">&gt;</span>       <span class="cm">&lt;!-- Plain text --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"number"</span><span class="tag">&gt;</span>     <span class="cm">&lt;!-- Numbers only --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"date"</span><span class="tag">&gt;</span>       <span class="cm">&lt;!-- Date picker --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"checkbox"</span><span class="tag">&gt;</span>  <span class="cm">&lt;!-- Tick box --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"radio"</span><span class="tag">&gt;</span>      <span class="cm">&lt;!-- One of many --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"file"</span><span class="tag">&gt;</span>       <span class="cm">&lt;!-- File upload --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"range"</span><span class="tag">&gt;</span>      <span class="cm">&lt;!-- Slider --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type=</span><span class="str">"color"</span><span class="tag">&gt;</span>      <span class="cm">&lt;!-- Color picker --&gt;</span>
+<span class="tag">&lt;select&gt;</span>
+  <span class="tag">&lt;option&gt;</span>HTML<span class="tag">&lt;/option&gt;</span>
+  <span class="tag">&lt;option&gt;</span>CSS<span class="tag">&lt;/option&gt;</span>
+<span class="tag">&lt;/select&gt;</span></pre></div>
+    </div>`,
+
+    semantic:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">Semantic HTML</h1>
+    <p class="notes-desc">Semantic elements clearly describe their meaning to the browser and developer. They improve SEO and accessibility.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Why Semantic HTML?</h2>
+      <ul>
+        <li>Better SEO — search engines understand your page structure</li>
+        <li>Screen readers work better for visually impaired users</li>
+        <li>Code is more readable for other developers</li>
+      </ul>
+      <h2><span class="num">02</span> Key Semantic Elements</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;header&gt;</span>   <span class="cm">&lt;!-- Top of page/section --&gt;</span>
+<span class="tag">&lt;nav&gt;</span>      <span class="cm">&lt;!-- Navigation links --&gt;</span>
+<span class="tag">&lt;main&gt;</span>     <span class="cm">&lt;!-- Main content --&gt;</span>
+<span class="tag">&lt;section&gt;</span>  <span class="cm">&lt;!-- Grouped content --&gt;</span>
+<span class="tag">&lt;article&gt;</span>  <span class="cm">&lt;!-- Blog post / news item --&gt;</span>
+<span class="tag">&lt;aside&gt;</span>    <span class="cm">&lt;!-- Sidebar / related info --&gt;</span>
+<span class="tag">&lt;footer&gt;</span>   <span class="cm">&lt;!-- Bottom of page --&gt;</span>
+<span class="tag">&lt;figure&gt;</span>   <span class="cm">&lt;!-- Image with caption --&gt;</span>
+<span class="tag">&lt;figcaption&gt;</span>Photo of a cat<span class="tag">&lt;/figcaption&gt;</span>
+<span class="tag">&lt;time</span> <span class="attr">datetime=</span><span class="str">"2026-01-01"</span><span class="tag">&gt;</span>Jan 1, 2026<span class="tag">&lt;/time&gt;</span></pre></div>
+      <h2><span class="num">03</span> Semantic Page Layout</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;header&gt;</span>
+    <span class="tag">&lt;nav&gt;</span><span class="tag">&lt;/nav&gt;</span>
+  <span class="tag">&lt;/header&gt;</span>
+  <span class="tag">&lt;main&gt;</span>
+    <span class="tag">&lt;section&gt;</span>
+      <span class="tag">&lt;article&gt;</span><span class="tag">&lt;/article&gt;</span>
+    <span class="tag">&lt;/section&gt;</span>
+    <span class="tag">&lt;aside&gt;</span><span class="tag">&lt;/aside&gt;</span>
+  <span class="tag">&lt;/main&gt;</span>
+  <span class="tag">&lt;footer&gt;</span><span class="tag">&lt;/footer&gt;</span>
+<span class="tag">&lt;/body&gt;</span></pre></div>
+    </div>`,
+
+    tables:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">HTML Tables</h1>
+    <p class="notes-desc">Tables are used to display data in rows and columns. Great for schedules, comparisons, and structured data.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Basic Table</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;table&gt;</span>
+  <span class="tag">&lt;thead&gt;</span>
+    <span class="tag">&lt;tr&gt;</span>
+      <span class="tag">&lt;th&gt;</span>Name<span class="tag">&lt;/th&gt;</span>
+      <span class="tag">&lt;th&gt;</span>Age<span class="tag">&lt;/th&gt;</span>
+      <span class="tag">&lt;th&gt;</span>Language<span class="tag">&lt;/th&gt;</span>
+    <span class="tag">&lt;/tr&gt;</span>
+  <span class="tag">&lt;/thead&gt;</span>
+  <span class="tag">&lt;tbody&gt;</span>
+    <span class="tag">&lt;tr&gt;</span>
+      <span class="tag">&lt;td&gt;</span>Priya<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;td&gt;</span>20<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;td&gt;</span>Python<span class="tag">&lt;/td&gt;</span>
+    <span class="tag">&lt;/tr&gt;</span>
+  <span class="tag">&lt;/tbody&gt;</span>
+<span class="tag">&lt;/table&gt;</span></pre></div>
+      <p><strong>Tags:</strong> &lt;table&gt; wraps everything. &lt;thead&gt; = header row. &lt;tbody&gt; = data. &lt;tr&gt; = row. &lt;th&gt; = header cell. &lt;td&gt; = data cell.</p>
+    </div>`,
+
+    media:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">Images & Media</h1>
+    <p class="notes-desc">Embedding images, video, and audio in HTML pages.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Images</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;img</span> <span class="attr">src=</span><span class="str">"cat.jpg"</span> <span class="attr">alt=</span><span class="str">"A cute cat"</span> <span class="attr">width=</span><span class="str">"400"</span> <span class="attr">height=</span><span class="str">"300"</span> <span class="attr">loading=</span><span class="str">"lazy"</span><span class="tag">&gt;</span></pre></div>
+      <h2><span class="num">02</span> Video</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;video</span> <span class="attr">src=</span><span class="str">"movie.mp4"</span> <span class="attr">controls</span> <span class="attr">autoplay</span> <span class="attr">muted</span> <span class="attr">width=</span><span class="str">"600"</span><span class="tag">&gt;&lt;/video&gt;</span></pre></div>
+      <h2><span class="num">03</span> Audio</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;audio</span> <span class="attr">src=</span><span class="str">"sound.mp3"</span> <span class="attr">controls</span><span class="tag">&gt;&lt;/audio&gt;</span></pre></div>
+      <h2><span class="num">04</span> Embed YouTube</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;iframe</span> <span class="attr">width=</span><span class="str">"560"</span> <span class="attr">height=</span><span class="str">"315"</span>
+  <span class="attr">src=</span><span class="str">"https://www.youtube.com/embed/VIDEO_ID"</span>
+  <span class="attr">allowfullscreen</span><span class="tag">&gt;&lt;/iframe&gt;</span></pre></div>
+    </div>`,
+
+    links:`<div class="notes-lang-badge">🌐 HTML</div>
+    <h1 class="notes-title">Links & Navigation</h1>
+    <p class="notes-desc">Links connect pages together — they are the backbone of the web.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Anchor Tags</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"page.html"</span><span class="tag">&gt;</span>Internal Link<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"https://google.com"</span> <span class="attr">target=</span><span class="str">"_blank"</span><span class="tag">&gt;</span>External<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"#section2"</span><span class="tag">&gt;</span>Jump to Section<span class="tag">&lt;/a&gt;</span>  <span class="cm">&lt;!-- anchor --&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"mailto:you@email.com"</span><span class="tag">&gt;</span>Email Me<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"tel:+911234567890"</span><span class="tag">&gt;</span>Call Me<span class="tag">&lt;/a&gt;</span></pre></div>
+      <h2><span class="num">02</span> Navigation Example</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="tag">&lt;nav&gt;</span>
+  <span class="tag">&lt;ul&gt;</span>
+    <span class="tag">&lt;li&gt;&lt;a</span> <span class="attr">href=</span><span class="str">"index.html"</span><span class="tag">&gt;</span>Home<span class="tag">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="tag">&lt;li&gt;&lt;a</span> <span class="attr">href=</span><span class="str">"about.html"</span><span class="tag">&gt;</span>About<span class="tag">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="tag">&lt;li&gt;&lt;a</span> <span class="attr">href=</span><span class="str">"contact.html"</span><span class="tag">&gt;</span>Contact<span class="tag">&lt;/a&gt;&lt;/li&gt;</span>
+  <span class="tag">&lt;/ul&gt;</span>
+<span class="tag">&lt;/nav&gt;</span></pre></div>
+    </div>`
+  },
+
+  css:{
+    intro:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">Introduction to CSS</h1>
+    <p class="notes-desc">CSS (Cascading Style Sheets) controls the visual appearance of HTML elements — colors, fonts, layout, spacing, and more.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Three Ways to Add CSS</h2>
+      <div class="code-block"><span class="lang-label">css/html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">/* 1. Inline */</span>
+<span class="tag">&lt;p</span> <span class="attr">style=</span><span class="str">"color:red;"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/p&gt;</span>
+
+<span class="cm">/* 2. Internal (inside &lt;head&gt;) */</span>
+<span class="tag">&lt;style&gt;</span>
+  p { color: red; }
+<span class="tag">&lt;/style&gt;</span>
+
+<span class="cm">/* 3. External (link in &lt;head&gt;) */</span>
+<span class="tag">&lt;link</span> <span class="attr">rel=</span><span class="str">"stylesheet"</span> <span class="attr">href=</span><span class="str">"style.css"</span><span class="tag">&gt;</span></pre></div>
+      <div class="tip"><strong>✅ Best Practice:</strong> Always use an external CSS file for real projects.</div>
+    </div>`,
+
+    selectors:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">CSS Selectors</h1>
+    <p class="notes-desc">Selectors define which HTML elements a CSS rule applies to.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Types of Selectors</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">/* Element selector */</span>
+p { color: blue; }
+
+<span class="cm">/* Class selector */</span>
+.card { background: white; }
+
+<span class="cm">/* ID selector */</span>
+#header { height: 80px; }
+
+<span class="cm">/* Descendant */</span>
+.nav a { color: white; }
+
+<span class="cm">/* Direct child */</span>
+.list > li { margin: 5px; }
+
+<span class="cm">/* Pseudo-class */</span>
+a:hover { text-decoration: none; }
+input:focus { border: 2px solid blue; }
+
+<span class="cm">/* Pseudo-element */</span>
+p::first-line { font-weight: bold; }
+h1::before { content: "★ "; }
+
+<span class="cm">/* Attribute selector */</span>
+input[type="email"] { border: 1px solid green; }</pre></div>
+    </div>`,
+
+    box:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">CSS Box Model</h1>
+    <p class="notes-desc">Every HTML element is a rectangular box. The box model describes the spacing around it.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Box Model Properties</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre">.box {
+  width: 300px;
+  height: 150px;
+  padding: 20px;       <span class="cm">/* inside space */</span>
+  border: 2px solid black;
+  margin: 30px;        <span class="cm">/* outside space */</span>
+  box-sizing: border-box; <span class="cm">/* padding inside width */</span>
+}</pre></div>
+      <p>From outside to inside: <strong>Margin → Border → Padding → Content</strong></p>
+      <h2><span class="num">02</span> Shorthand Margin/Padding</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>margin: 10px;               <span class="cm">/* all sides */</span>
+margin: 10px 20px;          <span class="cm">/* top/bottom  left/right */</span>
+margin: 10px 20px 15px 5px; <span class="cm">/* top right bottom left */</span>
+margin: auto;               <span class="cm">/* center horizontally */</span></pre></div>
+    </div>`,
+
+    flex:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">CSS Flexbox</h1>
+    <p class="notes-desc">Flexbox is the most powerful tool for one-dimensional layout — rows or columns.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Flex Container</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>.container {
+  display: flex;
+  flex-direction: row;       <span class="cm">/* row | column | row-reverse */</span>
+  justify-content: center;   <span class="cm">/* main axis alignment */</span>
+  align-items: center;       <span class="cm">/* cross axis alignment */</span>
+  flex-wrap: wrap;           <span class="cm">/* wrap to next line */</span>
+  gap: 16px;                 <span class="cm">/* space between items */</span>
+}
+<span class="cm">/* justify-content values: */</span>
+<span class="cm">/* flex-start | flex-end | center | space-between | space-around */</span>
+<span class="cm">/* align-items values: */</span>
+<span class="cm">/* flex-start | flex-end | center | stretch | baseline */</span></pre></div>
+      <h2><span class="num">02</span> Flex Items</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>.item {
+  flex: 1;           <span class="cm">/* grow and shrink equally */</span>
+  flex-grow: 2;      <span class="cm">/* take 2x more space */</span>
+  flex-shrink: 0;    <span class="cm">/* don't shrink */</span>
+  flex-basis: 200px; <span class="cm">/* starting size */</span>
+  align-self: flex-end; <span class="cm">/* override container alignment */</span>
+  order: 2;          <span class="cm">/* change visual order */</span>
+}</pre></div>
+    </div>`,
+
+    grid:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">CSS Grid</h1>
+    <p class="notes-desc">CSS Grid is the most powerful two-dimensional layout system available in CSS.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Grid Container</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>.grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;   <span class="cm">/* 3 columns */</span>
+  grid-template-rows: auto 200px auto;  <span class="cm">/* 3 rows */</span>
+  gap: 16px;                            <span class="cm">/* row and column gap */</span>
+  grid-template-columns: repeat(3, 1fr); <span class="cm">/* repeat shorthand */</span>
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); <span class="cm">/* responsive */</span>
+}</pre></div>
+      <h2><span class="num">02</span> Grid Item Placement</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>.item {
+  grid-column: 1 / 3;   <span class="cm">/* span from col 1 to 3 */</span>
+  grid-row: 1 / 2;
+  grid-column: span 2;  <span class="cm">/* span 2 columns */</span>
+}</pre></div>
+    </div>`,
+
+    animations:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">CSS Animations & Transitions</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Transitions</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>.btn {
+  background: blue;
+  transition: background 0.3s ease, transform 0.2s;
+}
+.btn:hover {
+  background: purple;
+  transform: translateY(-3px);
+}</pre></div>
+      <h2><span class="num">02</span> Keyframe Animations</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.element {
+  animation: fadeIn 0.8s ease forwards;
+  animation-delay: 0.3s;
+  animation-iteration-count: infinite; <span class="cm">/* loop */</span>
+}</pre></div>
+      <h2><span class="num">03</span> Transform</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>transform: translateX(50px);    <span class="cm">/* move right */</span>
+transform: scale(1.2);          <span class="cm">/* zoom in */</span>
+transform: rotate(45deg);       <span class="cm">/* rotate */</span>
+transform: skew(10deg);
+transform: translate(-50%, -50%) scale(1.1); <span class="cm">/* combine */</span></pre></div>
+    </div>`,
+
+    responsive:`<div class="notes-lang-badge">🎨 CSS</div>
+    <h1 class="notes-title">Responsive Design</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Media Queries</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">/* Mobile first */</span>
+.container { padding: 16px; }
+
+@media (min-width: 768px) {  <span class="cm">/* tablet */</span>
+  .container { padding: 32px; }
+}
+@media (min-width: 1200px) { <span class="cm">/* desktop */</span>
+  .container { max-width: 1200px; margin: auto; }
+}
+@media (max-width: 600px) {  <span class="cm">/* mobile only */</span>
+  nav { flex-direction: column; }
+}</pre></div>
+      <h2><span class="num">02</span> CSS Variables</h2>
+      <div class="code-block"><span class="lang-label">css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>:root {
+  --primary: #6c63ff;
+  --text: #333;
+  --spacing: 16px;
+}
+.button { background: var(--primary); padding: var(--spacing); }</pre></div>
+    </div>`
+  },
+
+  js:{
+    intro:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">Introduction to JavaScript</h1>
+    <p class="notes-desc">JavaScript is the programming language of the web. It makes pages interactive — buttons, animations, forms, data — all powered by JS.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Adding JS to HTML</h2>
+      <div class="code-block"><span class="lang-label">html</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">&lt;!-- Inline --&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+  console.log("Hello!");
+<span class="tag">&lt;/script&gt;</span>
+<span class="cm">&lt;!-- External (best practice) --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src=</span><span class="str">"script.js"</span> <span class="attr">defer</span><span class="tag">&gt;&lt;/script&gt;</span></pre></div>
+      <h2><span class="num">02</span> Output Methods</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>console.log("Debug output");   <span class="cm">// developer console</span>
+alert("Hello!");               <span class="cm">// popup box</span>
+document.write("Hi");          <span class="cm">// write to page</span>
+document.getElementById('out').textContent = "Hi";</pre></div>
+    </div>`,
+
+    variables:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">Variables & Data Types</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Declaring Variables</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">var</span> name = <span class="str">"Old way"</span>;    <span class="cm">// avoid in modern JS</span>
+<span class="kw">let</span> age = <span class="num">20</span>;            <span class="cm">// block-scoped, can reassign</span>
+<span class="kw">const</span> PI = <span class="num">3.14</span>;         <span class="cm">// block-scoped, can NOT reassign</span></pre></div>
+      <h2><span class="num">02</span> Data Types</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">let</span> str    = <span class="str">"Hello"</span>;          <span class="cm">// String</span>
+<span class="kw">let</span> num    = <span class="num">42</span>;               <span class="cm">// Number</span>
+<span class="kw">let</span> dec    = <span class="num">3.14</span>;             <span class="cm">// Number (float)</span>
+<span class="kw">let</span> bool   = <span class="kw">true</span>;             <span class="cm">// Boolean</span>
+<span class="kw">let</span> arr    = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];        <span class="cm">// Array</span>
+<span class="kw">let</span> obj    = { name: <span class="str">"Priya"</span> }; <span class="cm">// Object</span>
+<span class="kw">let</span> empty  = <span class="kw">null</span>;             <span class="cm">// Null</span>
+<span class="kw">let</span> undef;                      <span class="cm">// Undefined</span>
+typeof str; <span class="cm">// "string"</span></pre></div>
+      <h2><span class="num">03</span> Template Literals</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">let</span> name = <span class="str">"Priya"</span>;
+<span class="kw">let</span> msg = <span class="str">\`Hello, \${name}! You are \${20 + 1} years old.\`</span>;
+console.log(msg); <span class="cm">// Hello, Priya! You are 21 years old.</span></pre></div>
+    </div>`,
+
+    functions:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">JavaScript Functions</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Function Types</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">// Function Declaration</span>
+<span class="kw">function</span> <span class="fn">greet</span>(name) {
+  <span class="kw">return</span> <span class="str">\`Hello, \${name}!\`</span>;
+}
+
+<span class="cm">// Function Expression</span>
+<span class="kw">const</span> add = <span class="kw">function</span>(a, b) { <span class="kw">return</span> a + b; };
+
+<span class="cm">// Arrow Function</span>
+<span class="kw">const</span> multiply = (a, b) => a * b;
+
+<span class="cm">// Default Parameters</span>
+<span class="kw">function</span> <span class="fn">welcome</span>(name = <span class="str">"Guest"</span>) { <span class="kw">return</span> <span class="str">\`Hi, \${name}\`</span>; }
+
+<span class="cm">// Rest Parameters</span>
+<span class="kw">function</span> <span class="fn">sum</span>(...nums) { <span class="kw">return</span> nums.reduce((a,b) => a+b, <span class="num">0</span>); }
+<span class="fn">sum</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>); <span class="cm">// 10</span></pre></div>
+    </div>`,
+
+    arrays:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">JavaScript Arrays</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Creating & Accessing</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> fruits = [<span class="str">'apple'</span>, <span class="str">'banana'</span>, <span class="str">'cherry'</span>];
+fruits[<span class="num">0</span>];       <span class="cm">// 'apple'</span>
+fruits.length;   <span class="cm">// 3</span>
+fruits.push(<span class="str">'mango'</span>);   <span class="cm">// add to end</span>
+fruits.pop();            <span class="cm">// remove from end → 'mango'</span>
+fruits.unshift(<span class="str">'kiwi'</span>); <span class="cm">// add to start</span>
+fruits.shift();          <span class="cm">// remove from start</span>
+fruits.indexOf(<span class="str">'banana'</span>); <span class="cm">// 1</span>
+fruits.includes(<span class="str">'apple'</span>); <span class="cm">// true</span>
+fruits.splice(<span class="num">1</span>, <span class="num">1</span>);     <span class="cm">// remove 1 item at index 1</span></pre></div>
+      <h2><span class="num">02</span> Array Methods</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+nums.map(n => n * <span class="num">2</span>);        <span class="cm">// [2,4,6,8,10]</span>
+nums.filter(n => n > <span class="num">2</span>);     <span class="cm">// [3,4,5]</span>
+nums.reduce((a,b) => a+b, <span class="num">0</span>); <span class="cm">// 15</span>
+nums.find(n => n > <span class="num">3</span>);       <span class="cm">// 4</span>
+nums.some(n => n > <span class="num">4</span>);       <span class="cm">// true</span>
+nums.every(n => n > <span class="num">0</span>);      <span class="cm">// true</span>
+nums.sort((a,b) => b-a);      <span class="cm">// [5,4,3,2,1]</span>
+[...nums, <span class="num">6</span>, <span class="num">7</span>];             <span class="cm">// spread to new array</span></pre></div>
+    </div>`,
+
+    objects:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">JavaScript Objects</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Creating Objects</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> student = {
+  name: <span class="str">'Priya'</span>,
+  age: <span class="num">20</span>,
+  course: <span class="str">'CSE'</span>,
+  greet() { <span class="kw">return</span> <span class="str">\`Hi, I'm \${this.name}\`</span>; }
+};
+student.name;          <span class="cm">// 'Priya' (dot notation)</span>
+student['age'];        <span class="cm">// 20 (bracket notation)</span>
+student.city = <span class="str">'Delhi'</span>; <span class="cm">// add property</span>
+<span class="kw">delete</span> student.age;    <span class="cm">// remove property</span>
+Object.keys(student);   <span class="cm">// ['name','course','city','greet']</span>
+Object.values(student);
+<span class="kw">const</span> { name, course } = student; <span class="cm">// destructuring</span></pre></div>
+    </div>`,
+
+    dom:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">DOM Manipulation</h1>
+    <p class="notes-desc">The DOM (Document Object Model) is the tree of elements on a page. JS lets you read and change it.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Selecting Elements</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>document.getElementById(<span class="str">'myId'</span>);
+document.querySelector(<span class="str">'.myClass'</span>);   <span class="cm">// first match</span>
+document.querySelectorAll(<span class="str">'p'</span>);       <span class="cm">// all &lt;p&gt; tags</span>
+document.getElementsByClassName(<span class="str">'btn'</span>);</pre></div>
+      <h2><span class="num">02</span> Changing Elements</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> el = document.querySelector(<span class="str">'#box'</span>);
+el.textContent = <span class="str">'New Text'</span>;         <span class="cm">// change text</span>
+el.innerHTML = <span class="str">'&lt;b&gt;Bold&lt;/b&gt;'</span>;        <span class="cm">// change HTML</span>
+el.style.color = <span class="str">'red'</span>;               <span class="cm">// change style</span>
+el.classList.add(<span class="str">'active'</span>);           <span class="cm">// add class</span>
+el.classList.remove(<span class="str">'hidden'</span>);        <span class="cm">// remove class</span>
+el.classList.toggle(<span class="str">'dark'</span>);          <span class="cm">// toggle class</span>
+el.setAttribute(<span class="str">'data-id'</span>, <span class="str">'42'</span>);    <span class="cm">// set attribute</span></pre></div>
+      <h2><span class="num">03</span> Creating Elements</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> div = document.createElement(<span class="str">'div'</span>);
+div.textContent = <span class="str">'I was created by JS!'</span>;
+div.className = <span class="str">'card'</span>;
+document.body.appendChild(div);
+<span class="cm">// Remove an element</span>
+el.remove();</pre></div>
+    </div>`,
+
+    events:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">JavaScript Events</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Adding Event Listeners</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> btn = document.querySelector(<span class="str">'button'</span>);
+btn.addEventListener(<span class="str">'click'</span>, () => {
+  console.log(<span class="str">'Button clicked!'</span>);
+});
+<span class="cm">// Common events:</span>
+<span class="cm">// click, dblclick, mouseover, mouseout, mousemove</span>
+<span class="cm">// keydown, keyup, keypress</span>
+<span class="cm">// submit, change, input, focus, blur</span>
+<span class="cm">// load, resize, scroll</span></pre></div>
+      <h2><span class="num">02</span> Event Object</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>btn.addEventListener(<span class="str">'click'</span>, (e) => {
+  e.preventDefault();     <span class="cm">// stop default behaviour (form submit)</span>
+  e.stopPropagation();    <span class="cm">// stop bubbling up</span>
+  console.log(e.target);  <span class="cm">// the element clicked</span>
+  console.log(e.clientX, e.clientY); <span class="cm">// mouse position</span>
+});
+document.addEventListener(<span class="str">'keydown'</span>, (e) => {
+  console.log(e.key);     <span class="cm">// 'Enter', 'ArrowUp', etc.</span>
+});</pre></div>
+    </div>`,
+
+    async:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">Async JavaScript & Promises</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Callbacks (old way)</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>setTimeout(() => console.log(<span class="str">'After 2 sec'</span>), <span class="num">2000</span>);
+setInterval(() => console.log(<span class="str">'Every second'</span>), <span class="num">1000</span>);</pre></div>
+      <h2><span class="num">02</span> Promises</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> myPromise = <span class="kw">new</span> Promise((resolve, reject) => {
+  <span class="kw">let</span> success = <span class="kw">true</span>;
+  <span class="kw">if</span>(success) resolve(<span class="str">'Done!'</span>);
+  <span class="kw">else</span> reject(<span class="str">'Error!'</span>);
+});
+myPromise
+  .then(result => console.log(result))
+  .catch(err => console.log(err));</pre></div>
+      <h2><span class="num">03</span> Async / Await</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">async function</span> <span class="fn">getData</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">'https://api.example.com/data'</span>);
+    <span class="kw">const</span> data = <span class="kw">await</span> response.json();
+    console.log(data);
+  } <span class="kw">catch</span>(err) {
+    console.error(<span class="str">'Error:'</span>, err);
+  }
+}
+<span class="fn">getData</span>();</pre></div>
+    </div>`,
+
+    es6:`<div class="notes-lang-badge">⚡ JavaScript</div>
+    <h1 class="notes-title">ES6+ Modern JavaScript</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Destructuring</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">// Array destructuring</span>
+<span class="kw">const</span> [a, b, c] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+<span class="cm">// Object destructuring</span>
+<span class="kw">const</span> { name, age, city = <span class="str">'Delhi'</span> } = user; <span class="cm">// default value</span>
+<span class="cm">// Swap variables</span>
+[a, b] = [b, a];</pre></div>
+      <h2><span class="num">02</span> Spread & Rest</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">const</span> arr1 = [<span class="num">1</span>,<span class="num">2</span>], arr2 = [<span class="num">3</span>,<span class="num">4</span>];
+<span class="kw">const</span> merged = [...arr1, ...arr2]; <span class="cm">// [1,2,3,4]</span>
+<span class="kw">const</span> copy = {...obj, newKey: <span class="str">'val'</span>}; <span class="cm">// clone + add key</span>
+<span class="kw">function</span> <span class="fn">sum</span>(...args) { <span class="kw">return</span> args.reduce((a,b)=>a+b); }</pre></div>
+      <h2><span class="num">03</span> Optional Chaining & Nullish</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>user?.address?.city;    <span class="cm">// safe access</span>
+value ?? <span class="str">'default'</span>;    <span class="cm">// if null/undefined, use default</span>
+arr?.length ?? <span class="num">0</span>;</pre></div>
+    </div>`
+  },
+
+  jsa:{
+    closures:`<div class="notes-lang-badge">🚀 JS Advanced</div>
+    <h1 class="notes-title">Closures</h1>
+    <p class="notes-desc">A closure is a function that remembers the variables from its outer scope even after that scope has finished.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Closure Example</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">function</span> <span class="fn">makeCounter</span>() {
+  <span class="kw">let</span> count = <span class="num">0</span>;      <span class="cm">// private variable</span>
+  <span class="kw">return</span> {
+    increment: () => ++count,
+    decrement: () => --count,
+    getCount:  () => count
+  };
+}
+<span class="kw">const</span> counter = <span class="fn">makeCounter</span>();
+counter.increment(); <span class="cm">// 1</span>
+counter.increment(); <span class="cm">// 2</span>
+counter.getCount();  <span class="cm">// 2</span></pre></div>
+      <div class="tip"><strong>💡 Why closures?</strong> They allow data privacy — count is not accessible from outside, only through the returned methods.</div>
+    </div>`,
+
+    prototype:`<div class="notes-lang-badge">🚀 JS Advanced</div>
+    <h1 class="notes-title">Prototypes & Classes</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> ES6 Class Syntax</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">class</span> Animal {
+  <span class="fn">constructor</span>(name) {
+    this.name = name;
+  }
+  speak() {
+    console.log(<span class="str">\`\${this.name} makes a sound.\`</span>);
+  }
+}
+<span class="kw">class</span> Dog <span class="kw">extends</span> Animal {
+  speak() {
+    console.log(<span class="str">\`\${this.name} barks.\`</span>);
+    super.speak();     <span class="cm">// call parent method</span>
+  }
+}
+<span class="kw">const</span> dog = <span class="kw">new</span> Dog(<span class="str">'Rex'</span>);
+dog.speak();          <span class="cm">// Rex barks. Rex makes a sound.</span></pre></div>
+    </div>`,
+
+    eventloop:`<div class="notes-lang-badge">🚀 JS Advanced</div>
+    <h1 class="notes-title">The Event Loop</h1>
+    <p class="notes-desc">JavaScript is single-threaded but handles async code through the Event Loop.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> How it works</h2>
+      <ul>
+        <li><strong>Call Stack</strong> — executes synchronous code</li>
+        <li><strong>Web APIs</strong> — browser handles setTimeout, fetch, etc.</li>
+        <li><strong>Task Queue</strong> — callbacks wait here</li>
+        <li><strong>Microtask Queue</strong> — Promises go here (higher priority)</li>
+        <li><strong>Event Loop</strong> — moves tasks from queue to stack when stack is empty</li>
+      </ul>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>console.log(<span class="str">'1'</span>);
+setTimeout(() => console.log(<span class="str">'2'</span>), <span class="num">0</span>);
+Promise.resolve().then(() => console.log(<span class="str">'3'</span>));
+console.log(<span class="str">'4'</span>);
+<span class="cm">// Output: 1, 4, 3, 2</span>
+<span class="cm">// Reason: sync → microtasks → macrotasks</span></pre></div>
+    </div>`,
+
+    modules:`<div class="notes-lang-badge">🚀 JS Advanced</div>
+    <h1 class="notes-title">JS Modules</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Export & Import</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">// math.js</span>
+<span class="kw">export const</span> add = (a,b) => a+b;
+<span class="kw">export const</span> PI = <span class="num">3.14159</span>;
+<span class="kw">export default function</span> <span class="fn">multiply</span>(a,b) { <span class="kw">return</span> a*b; }
+
+<span class="cm">// main.js</span>
+<span class="kw">import</span> multiply, { add, PI } <span class="kw">from</span> <span class="str">'./math.js'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> Math <span class="kw">from</span> <span class="str">'./math.js'</span>;
+
+<span class="cm">// In HTML:</span>
+<span class="tag">&lt;script</span> <span class="attr">type=</span><span class="str">"module"</span> <span class="attr">src=</span><span class="str">"main.js"</span><span class="tag">&gt;&lt;/script&gt;</span></pre></div>
+    </div>`,
+
+    fetch:`<div class="notes-lang-badge">🚀 JS Advanced</div>
+    <h1 class="notes-title">Fetch API & JSON</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> GET Request</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">async function</span> <span class="fn">getUsers</span>() {
+  <span class="kw">const</span> res  = <span class="kw">await</span> fetch(<span class="str">'https://jsonplaceholder.typicode.com/users'</span>);
+  <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+  console.log(data);
+}</pre></div>
+      <h2><span class="num">02</span> POST Request</h2>
+      <div class="code-block"><span class="lang-label">js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">await</span> fetch(<span class="str">'/api/users'</span>, {
+  method: <span class="str">'POST'</span>,
+  headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+  body: JSON.stringify({ name: <span class="str">'Priya'</span>, age: <span class="num">20</span> })
+});</pre></div>
+    </div>`
+  },
+
+  py:{
+    intro:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Introduction to Python</h1>
+    <p class="notes-desc">Python is a high-level, beginner-friendly programming language known for its clean syntax and wide use in AI/ML, web dev, automation, and data science.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Your First Python Program</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="fn">print</span>(<span class="str">"Hello, World!"</span>)
+<span class="fn">print</span>(<span class="str">"Welcome to Python"</span>)</pre></div>
+      <h2><span class="num">02</span> Comments</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm"># Single line comment</span>
+<span class="str">"""
+Multi-line
+comment (docstring)
+"""</span></pre></div>
+      <div class="tip"><strong>💡</strong> Python uses indentation (spaces) instead of curly braces to define code blocks.</div>
+    </div>`,
+
+    variables:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Python Variables & Types</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Variables</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>name = <span class="str">"Priya"</span>          <span class="cm"># String</span>
+age  = <span class="num">20</span>               <span class="cm"># Integer</span>
+gpa  = <span class="num">9.2</span>              <span class="cm"># Float</span>
+is_student = <span class="kw">True</span>      <span class="cm"># Boolean</span>
+x, y, z = <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>     <span class="cm"># Multiple assignment</span>
+
+<span class="fn">type</span>(name)     <span class="cm"># &lt;class 'str'&gt;</span>
+<span class="fn">type</span>(age)      <span class="cm"># &lt;class 'int'&gt;</span></pre></div>
+      <h2><span class="num">02</span> String Operations</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>s = <span class="str">"Hello, Python!"</span>
+s.upper()            <span class="cm"># "HELLO, PYTHON!"</span>
+s.lower()            <span class="cm"># "hello, python!"</span>
+s.replace(<span class="str">"Hello"</span>,<span class="str">"Hi"</span>)
+s.split(<span class="str">","</span>)         <span class="cm"># ['Hello', ' Python!']</span>
+s[<span class="num">0</span>:<span class="num">5</span>]              <span class="cm"># "Hello" (slicing)</span>
+<span class="fn">len</span>(s)               <span class="cm"># 14</span>
+f<span class="str">"Name: {name}, Age: {age}"</span>  <span class="cm"># f-string</span></pre></div>
+    </div>`,
+
+    control:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Python Control Flow</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> If / Elif / Else</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>score = <span class="num">85</span>
+<span class="kw">if</span> score >= <span class="num">90</span>:
+    <span class="fn">print</span>(<span class="str">"A grade"</span>)
+<span class="kw">elif</span> score >= <span class="num">80</span>:
+    <span class="fn">print</span>(<span class="str">"B grade"</span>)
+<span class="kw">elif</span> score >= <span class="num">70</span>:
+    <span class="fn">print</span>(<span class="str">"C grade"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Fail"</span>)</pre></div>
+      <h2><span class="num">02</span> For Loop</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):        <span class="cm"># 0,1,2,3,4</span>
+    <span class="fn">print</span>(i)
+
+<span class="kw">for</span> fruit <span class="kw">in</span> [<span class="str">'apple'</span>, <span class="str">'banana'</span>]:
+    <span class="fn">print</span>(fruit)
+
+<span class="kw">for</span> i, val <span class="kw">in</span> <span class="fn">enumerate</span>([<span class="str">'a'</span>,<span class="str">'b'</span>,<span class="str">'c'</span>]):
+    <span class="fn">print</span>(i, val)   <span class="cm"># 0 a, 1 b, 2 c</span></pre></div>
+      <h2><span class="num">03</span> While Loop</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>count = <span class="num">0</span>
+<span class="kw">while</span> count < <span class="num">5</span>:
+    <span class="fn">print</span>(count)
+    count += <span class="num">1</span>
+<span class="cm"># break exits, continue skips to next iteration</span></pre></div>
+    </div>`,
+
+    functions:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Python Functions</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Defining Functions</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">def</span> <span class="fn">greet</span>(name):
+    <span class="kw">return</span> f<span class="str">"Hello, {name}!"</span>
+
+<span class="kw">def</span> <span class="fn">add</span>(a, b=<span class="num">0</span>):    <span class="cm"># default argument</span>
+    <span class="kw">return</span> a + b
+
+<span class="kw">def</span> <span class="fn">info</span>(**kwargs):  <span class="cm"># keyword args</span>
+    <span class="kw">for</span> k, v <span class="kw">in</span> kwargs.items():
+        <span class="fn">print</span>(k, v)
+
+<span class="cm"># Lambda (anonymous function)</span>
+square = <span class="kw">lambda</span> x: x ** <span class="num">2</span>
+square(<span class="num">5</span>)   <span class="cm"># 25</span></pre></div>
+    </div>`,
+
+    lists:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Lists & Tuples</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Lists (mutable)</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>fruits = [<span class="str">'apple'</span>, <span class="str">'banana'</span>, <span class="str">'cherry'</span>]
+fruits.append(<span class="str">'mango'</span>)
+fruits.insert(<span class="num">1</span>, <span class="str">'kiwi'</span>)
+fruits.remove(<span class="str">'banana'</span>)
+fruits.pop()               <span class="cm"># removes last</span>
+fruits.sort()
+fruits.reverse()
+fruits[<span class="num">1</span>:<span class="num">3</span>]                <span class="cm"># slicing</span>
+<span class="fn">len</span>(fruits)
+<span class="cm"># List Comprehension</span>
+squares = [x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+evens   = [x <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">20</span>) <span class="kw">if</span> x%<span class="num">2</span>==<span class="num">0</span>]</pre></div>
+      <h2><span class="num">02</span> Tuples (immutable)</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>point = (<span class="num">10</span>, <span class="num">20</span>)
+x, y = point       <span class="cm"># unpacking</span>
+point[<span class="num">0</span>]            <span class="cm"># 10</span>
+<span class="cm"># Tuples are faster and safer than lists for fixed data</span></pre></div>
+    </div>`,
+
+    dicts:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">Python Dictionaries</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Dictionaries</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>student = {
+    <span class="str">'name'</span>: <span class="str">'Priya'</span>,
+    <span class="str">'age'</span>: <span class="num">20</span>,
+    <span class="str">'courses'</span>: [<span class="str">'Python'</span>, <span class="str">'SQL'</span>]
+}
+student[<span class="str">'name'</span>]           <span class="cm"># 'Priya'</span>
+student.get(<span class="str">'gpa'</span>, <span class="num">0</span>)    <span class="cm"># 0 (safe get)</span>
+student[<span class="str">'city'</span>] = <span class="str">'Delhi'</span>  <span class="cm"># add key</span>
+<span class="kw">del</span> student[<span class="str">'age'</span>]         <span class="cm"># delete key</span>
+student.keys()
+student.values()
+student.items()
+<span class="kw">for</span> k, v <span class="kw">in</span> student.items():
+    <span class="fn">print</span>(k, v)</pre></div>
+    </div>`,
+
+    oop:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">OOP & Classes</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Classes</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">class</span> Student:
+    school = <span class="str">"CodingHub"</span>    <span class="cm"># class attribute</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name, age):
+        self.name = name    <span class="cm"># instance attributes</span>
+        self.age  = age
+    <span class="kw">def</span> <span class="fn">greet</span>(self):
+        <span class="kw">return</span> f<span class="str">"Hi, I'm {self.name}"</span>
+    <span class="kw">def</span> <span class="fn">__str__</span>(self):      <span class="cm"># string representation</span>
+        <span class="kw">return</span> f<span class="str">"Student({self.name})"</span>
+
+<span class="kw">class</span> GradStudent(Student):  <span class="cm"># Inheritance</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name, age, thesis):
+        <span class="fn">super()</span>.__init__(name, age)
+        self.thesis = thesis
+
+s = Student(<span class="str">"Priya"</span>, <span class="num">20</span>)
+s.greet()   <span class="cm"># "Hi, I'm Priya"</span></pre></div>
+    </div>`,
+
+    fileio:`<div class="notes-lang-badge">🐍 Python</div>
+    <h1 class="notes-title">File I/O in Python</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Reading & Writing Files</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm"># Write to file</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"notes.txt"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+    f.write(<span class="str">"Hello, file!"</span>)
+
+<span class="cm"># Read entire file</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"notes.txt"</span>, <span class="str">"r"</span>) <span class="kw">as</span> f:
+    content = f.read()
+
+<span class="cm"># Read line by line</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"notes.txt"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        <span class="fn">print</span>(line.strip())
+
+<span class="cm"># Append to file</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"notes.txt"</span>, <span class="str">"a"</span>) <span class="kw">as</span> f:
+    f.write(<span class="str">"\nNew line"</span>)</pre></div>
+    </div>`
+  },
+
+  pya:{
+    decorators:`<div class="notes-lang-badge">🤖 Python Advanced</div>
+    <h1 class="notes-title">Python Decorators</h1>
+    <p class="notes-desc">Decorators are functions that modify the behaviour of other functions without changing their source code.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Creating a Decorator</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">def</span> <span class="fn">my_decorator</span>(func):
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+        <span class="fn">print</span>(<span class="str">"Before function"</span>)
+        result = func(*args, **kwargs)
+        <span class="fn">print</span>(<span class="str">"After function"</span>)
+        <span class="kw">return</span> result
+    <span class="kw">return</span> wrapper
+
+@my_decorator
+<span class="kw">def</span> <span class="fn">greet</span>(name):
+    <span class="fn">print</span>(f<span class="str">"Hello, {name}!"</span>)
+
+greet(<span class="str">"Priya"</span>)
+<span class="cm"># Before function → Hello, Priya! → After function</span></pre></div>
+      <h2><span class="num">02</span> Common Built-in Decorators</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">class</span> Circle:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, r): self.r = r
+
+    @property
+    <span class="kw">def</span> <span class="fn">area</span>(self): <span class="kw">return</span> <span class="num">3.14</span> * self.r ** <span class="num">2</span>
+
+    @staticmethod
+    <span class="kw">def</span> <span class="fn">describe</span>(): <span class="kw">return</span> <span class="str">"I am a circle"</span>
+
+    @classmethod
+    <span class="kw">def</span> <span class="fn">unit</span>(cls): <span class="kw">return</span> cls(<span class="num">1</span>)</pre></div>
+    </div>`,
+
+    generators:`<div class="notes-lang-badge">🤖 Python Advanced</div>
+    <h1 class="notes-title">Generators</h1>
+    <p class="notes-desc">Generators produce values lazily — one at a time — saving memory for large datasets.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Generator Function</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">def</span> <span class="fn">count_up</span>(n):
+    i = <span class="num">0</span>
+    <span class="kw">while</span> i < n:
+        <span class="kw">yield</span> i     <span class="cm"># pause and produce value</span>
+        i += <span class="num">1</span>
+
+<span class="kw">for</span> num <span class="kw">in</span> count_up(<span class="num">5</span>):
+    <span class="fn">print</span>(num)     <span class="cm"># 0 1 2 3 4</span>
+
+<span class="cm"># Generator expression</span>
+squares = (x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1000000</span>))  <span class="cm"># memory efficient</span></pre></div>
+    </div>`,
+
+    async:`<div class="notes-lang-badge">🤖 Python Advanced</div>
+    <h1 class="notes-title">Async Programming in Python</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Async / Await</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">fetch_data</span>():
+    <span class="fn">print</span>(<span class="str">"Fetching..."</span>)
+    <span class="kw">await</span> asyncio.sleep(<span class="num">2</span>)   <span class="cm"># simulate delay</span>
+    <span class="kw">return</span> <span class="str">"Data received"</span>
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    result = <span class="kw">await</span> fetch_data()
+    <span class="fn">print</span>(result)
+
+asyncio.run(main())</pre></div>
+    </div>`,
+
+    numpy:`<div class="notes-lang-badge">🤖 Python Advanced</div>
+    <h1 class="notes-title">NumPy Basics</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> NumPy Arrays</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+a = np.array([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>])
+b = np.zeros((<span class="num">3</span>, <span class="num">3</span>))
+c = np.ones((<span class="num">2</span>, <span class="num">4</span>))
+d = np.arange(<span class="num">0</span>, <span class="num">10</span>, <span class="num">2</span>)    <span class="cm"># [0,2,4,6,8]</span>
+e = np.linspace(<span class="num">0</span>, <span class="num">1</span>, <span class="num">5</span>)   <span class="cm"># 5 evenly spaced</span>
+a.shape     <span class="cm"># (5,)</span>
+a.dtype     <span class="cm"># int64</span>
+a * <span class="num">2</span>       <span class="cm"># [2,4,6,8,10] vectorized</span>
+np.mean(a)  <span class="cm"># 3.0</span>
+np.sum(a)   <span class="cm"># 15</span>
+np.sqrt(a)
+a[a > <span class="num">2</span>]   <span class="cm"># boolean indexing → [3,4,5]</span></pre></div>
+    </div>`,
+
+    pandas:`<div class="notes-lang-badge">🤖 Python Advanced</div>
+    <h1 class="notes-title">Pandas Basics</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> DataFrames</h2>
+      <div class="code-block"><span class="lang-label">python</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.DataFrame({
+    <span class="str">'Name'</span>: [<span class="str">'Priya'</span>, <span class="str">'Raj'</span>, <span class="str">'Anu'</span>],
+    <span class="str">'Score'</span>: [<span class="num">90</span>, <span class="num">85</span>, <span class="num">92</span>],
+    <span class="str">'Grade'</span>: [<span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'A'</span>]
+})
+df.head()
+df.info()
+df.describe()
+df[<span class="str">'Score'</span>]          <span class="cm"># Series</span>
+df[df[<span class="str">'Score'</span>] > <span class="num">88</span>] <span class="cm"># filter</span>
+df.groupby(<span class="str">'Grade'</span>).mean()
+df.sort_values(<span class="str">'Score'</span>, ascending=<span class="kw">False</span>)
+df.dropna()             <span class="cm"># remove null rows</span>
+df.fillna(<span class="num">0</span>)
+df.to_csv(<span class="str">'data.csv'</span>)
+pd.read_csv(<span class="str">'data.csv'</span>)</pre></div>
+    </div>`
+  },
+
+  sql:{
+    intro:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">Introduction to SQL</h1>
+    <p class="notes-desc">SQL (Structured Query Language) is used to communicate with relational databases. It lets you create, read, update and delete data.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> What is a Database?</h2>
+      <p>A database is an organised collection of data stored in tables. A table has rows (records) and columns (fields).</p>
+      <h2><span class="num">02</span> Create a Table</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">CREATE TABLE</span> students (
+    id       <span class="fn">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    name     <span class="fn">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+    age      <span class="fn">INT</span>,
+    course   <span class="fn">VARCHAR</span>(<span class="num">50</span>),
+    gpa      <span class="fn">DECIMAL</span>(<span class="num">3</span>,<span class="num">2</span>)
+);</pre></div>
+    </div>`,
+
+    select:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">SELECT & WHERE</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> SELECT Queries</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> students;
+<span class="kw">SELECT</span> name, age <span class="kw">FROM</span> students;
+<span class="kw">SELECT DISTINCT</span> course <span class="kw">FROM</span> students;
+<span class="kw">SELECT</span> name, gpa * <span class="num">10</span> <span class="kw">AS</span> score <span class="kw">FROM</span> students;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">LIMIT</span> <span class="num">10</span>;</pre></div>
+      <h2><span class="num">02</span> WHERE Clause</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> age > <span class="num">20</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> course = <span class="str">'Python'</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> age <span class="kw">BETWEEN</span> <span class="num">18</span> <span class="kw">AND</span> <span class="num">25</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">'P%'</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> course <span class="kw">IN</span> (<span class="str">'Python'</span>, <span class="str">'SQL'</span>);
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> gpa <span class="kw">IS NOT NULL</span>;</pre></div>
+    </div>`,
+
+    joins:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">SQL JOINs</h1>
+    <p class="notes-desc">JOINs combine rows from two or more tables based on a related column.</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> Types of JOINs</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">-- INNER JOIN: only matching rows</span>
+<span class="kw">SELECT</span> s.name, c.course_name
+<span class="kw">FROM</span> students s
+<span class="kw">INNER JOIN</span> courses c <span class="kw">ON</span> s.course_id = c.id;
+
+<span class="cm">-- LEFT JOIN: all from left + matching right</span>
+<span class="kw">SELECT</span> s.name, c.course_name
+<span class="kw">FROM</span> students s
+<span class="kw">LEFT JOIN</span> courses c <span class="kw">ON</span> s.course_id = c.id;
+
+<span class="cm">-- RIGHT JOIN: all from right + matching left</span>
+<span class="kw">SELECT</span> s.name, c.course_name
+<span class="kw">FROM</span> students s
+<span class="kw">RIGHT JOIN</span> courses c <span class="kw">ON</span> s.course_id = c.id;</pre></div>
+    </div>`,
+
+    group:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">GROUP BY & HAVING</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> GROUP BY</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">-- Count students per course</span>
+<span class="kw">SELECT</span> course, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total
+<span class="kw">FROM</span> students
+<span class="kw">GROUP BY</span> course;
+
+<span class="cm">-- Average GPA per course</span>
+<span class="kw">SELECT</span> course, <span class="fn">AVG</span>(gpa) <span class="kw">AS</span> avg_gpa, <span class="fn">MAX</span>(gpa), <span class="fn">MIN</span>(gpa)
+<span class="kw">FROM</span> students
+<span class="kw">GROUP BY</span> course;
+
+<span class="cm">-- HAVING filters groups (like WHERE for GROUP BY)</span>
+<span class="kw">SELECT</span> course, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total
+<span class="kw">FROM</span> students
+<span class="kw">GROUP BY</span> course
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">5</span>;</pre></div>
+    </div>`,
+
+    crud:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">INSERT / UPDATE / DELETE</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> INSERT</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">INSERT INTO</span> students (name, age, course, gpa)
+<span class="kw">VALUES</span> (<span class="str">'Priya'</span>, <span class="num">20</span>, <span class="str">'Python'</span>, <span class="num">9.2</span>);
+
+<span class="kw">INSERT INTO</span> students (name, age) <span class="kw">VALUES</span>
+(<span class="str">'Raj'</span>, <span class="num">22</span>), (<span class="str">'Anu'</span>, <span class="num">19</span>);  <span class="cm">-- Multiple rows</span></pre></div>
+      <h2><span class="num">02</span> UPDATE</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">UPDATE</span> students
+<span class="kw">SET</span> gpa = <span class="num">9.5</span>, course = <span class="str">'AI'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;</pre></div>
+      <h2><span class="num">03</span> DELETE</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">DELETE FROM</span> students <span class="kw">WHERE</span> id = <span class="num">5</span>;
+<span class="kw">DELETE FROM</span> students <span class="kw">WHERE</span> gpa < <span class="num">5.0</span>;
+<span class="warn"><strong>⚠️ Warning:</strong> Always use WHERE with DELETE, or you'll delete ALL rows!</span></pre></div>
+    </div>`,
+
+    constraints:`<div class="notes-lang-badge">🗄️ SQL</div>
+    <h1 class="notes-title">Constraints & Keys</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Constraints</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">CREATE TABLE</span> orders (
+    id         <span class="fn">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    student_id <span class="fn">INT</span> <span class="kw">NOT NULL</span>,
+    total      <span class="fn">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0.00</span>,
+    email      <span class="fn">VARCHAR</span>(<span class="num">100</span>) <span class="kw">UNIQUE</span>,
+    status     <span class="fn">VARCHAR</span>(<span class="num">20</span>) <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="str">'paid'</span>,<span class="str">'pending'</span>)),
+    <span class="kw">FOREIGN KEY</span> (student_id) <span class="kw">REFERENCES</span> students(id)
+);</pre></div>
+    </div>`
+  },
+
+  sqla:{
+    window:`<div class="notes-lang-badge">⚙️ SQL Advanced</div>
+    <h1 class="notes-title">Window Functions</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> ROW_NUMBER, RANK, DENSE_RANK</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">SELECT</span> name, gpa,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>) <span class="kw">AS</span> row_num,
+    <span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>) <span class="kw">AS</span> rank_num,
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>) <span class="kw">AS</span> dense_rank,
+    <span class="fn">SUM</span>(gpa)     <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> course) <span class="kw">AS</span> course_total
+<span class="kw">FROM</span> students;</pre></div>
+    </div>`,
+
+    cte:`<div class="notes-lang-badge">⚙️ SQL Advanced</div>
+    <h1 class="notes-title">CTEs (Common Table Expressions)</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> WITH Clause</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">WITH</span> TopStudents <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> name, gpa
+    <span class="kw">FROM</span> students
+    <span class="kw">WHERE</span> gpa >= <span class="num">9.0</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> TopStudents
+<span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>;
+
+<span class="cm">-- Recursive CTE</span>
+<span class="kw">WITH RECURSIVE</span> nums <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">AS</span> n
+    <span class="kw">UNION ALL</span>
+    <span class="kw">SELECT</span> n + <span class="num">1</span> <span class="kw">FROM</span> nums <span class="kw">WHERE</span> n < <span class="num">10</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> nums;</pre></div>
+    </div>`,
+
+    stored:`<div class="notes-lang-badge">⚙️ SQL Advanced</div>
+    <h1 class="notes-title">Stored Procedures</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Creating Procedures</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">DELIMITER</span> //
+<span class="kw">CREATE PROCEDURE</span> GetTopStudents(IN min_gpa <span class="fn">DECIMAL</span>(<span class="num">3</span>,<span class="num">2</span>))
+<span class="kw">BEGIN</span>
+    <span class="kw">SELECT</span> name, gpa
+    <span class="kw">FROM</span> students
+    <span class="kw">WHERE</span> gpa >= min_gpa
+    <span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>;
+<span class="kw">END</span> //
+<span class="kw">DELIMITER</span> ;
+
+<span class="kw">CALL</span> GetTopStudents(<span class="num">9.0</span>);</pre></div>
+    </div>`,
+
+    indexes:`<div class="notes-lang-badge">⚙️ SQL Advanced</div>
+    <h1 class="notes-title">Indexes</h1>
+    <div class="note-section">
+      <h2><span class="num">01</span> Creating & Using Indexes</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="cm">-- Create index (speeds up searches)</span>
+<span class="kw">CREATE INDEX</span> idx_name <span class="kw">ON</span> students(name);
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email <span class="kw">ON</span> students(email);
+<span class="kw">CREATE INDEX</span> idx_multi <span class="kw">ON</span> students(course, gpa);
+
+<span class="cm">-- View indexes</span>
+<span class="kw">SHOW INDEXES FROM</span> students;
+
+<span class="cm">-- Drop index</span>
+<span class="kw">DROP INDEX</span> idx_name <span class="kw">ON</span> students;
+
+<span class="cm">-- EXPLAIN to check query plan</span>
+<span class="kw">EXPLAIN SELECT</span> * <span class="kw">FROM</span> students <span class="kw">WHERE</span> name = <span class="str">'Priya'</span>;</pre></div>
+    </div>`,
+
+    transactions:`<div class="notes-lang-badge">⚙️ SQL Advanced</div>
+    <h1 class="notes-title">Transactions</h1>
+    <p class="notes-desc">Transactions group multiple SQL statements so they all succeed or all fail together (ACID properties).</p>
+    <div class="note-section">
+      <h2><span class="num">01</span> COMMIT & ROLLBACK</h2>
+      <div class="code-block"><span class="lang-label">sql</span><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><span class="kw">START TRANSACTION</span>;
+
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - <span class="num">500</span> <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance + <span class="num">500</span> <span class="kw">WHERE</span> id = <span class="num">2</span>;
+
+<span class="cm">-- If both succeeded:</span>
+<span class="kw">COMMIT</span>;
+
+<span class="cm">-- If something went wrong:</span>
+<span class="kw">ROLLBACK</span>;
+
+<span class="cm">-- Savepoint</span>
+<span class="kw">SAVEPOINT</span> sp1;
+<span class="kw">ROLLBACK TO</span> sp1;</pre></div>
+    </div>`
+  }
+};
+
+/* SHOW NOTES */
+function showNotes(lang, topic) {
+  const key = notes[lang]?.[topic];
+  if(!key) return;
+  document.getElementById('mainContent').innerHTML = `<div class="content-area" style="padding-top:0">${key}</div>`;
+  document.querySelectorAll('.topic-item').forEach(i=>i.classList.remove('active'));
+  const el = document.querySelector(`.topic-item[onclick*="showNotes('${lang}','${topic}')"]`);
+  if(el){el.classList.add('active');}
+  window.scrollTo({top:0,behavior:'smooth'});
+  // update breadcrumb
+  document.getElementById('breadLang').textContent = lang.toUpperCase() + ' / ' + topic;
+}
+
+/* URL PARAMS on load */
+window.addEventListener('load', () => {
+  const p = new URLSearchParams(window.location.search);
+  const lang = p.get('lang'); const topic = p.get('topic');
+  if(lang && topic) showNotes(lang.replace('-',''), topic);
+  else if(lang) {
+    const map = {html:'html',css:'css',js:'js','js-advanced':'jsa',python:'py','python-advanced':'pya',sql:'sql','sql-advanced':'sqla'};
+    const key = map[lang];
+    if(key && notes[key]) {
+      const firstTopic = Object.keys(notes[key])[0];
+      showNotes(key, firstTopic);
+    }
+  }
+});
+
+/* CHATBOT */
+let chatOpen2=false;
+function toggleChatTop(){
+  chatOpen2=!chatOpen2;
+  document.getElementById('chatbot-window').style.display=chatOpen2?'flex':'none';
+}
+/* COPY CODE */
+function copyCode(btn){
+  const pre=btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='Copied!';btn.style.background='rgba(67,233,123,.3)';btn.style.borderColor='var(--accent3)';btn.style.color='var(--accent3)';
+    setTimeout(()=>{btn.textContent='Copy';btn.style.background='';btn.style.borderColor='';btn.style.color='';},2000);
+  });
+}
+</script>
+</body>
+</html>
