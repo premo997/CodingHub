@@ -41,7 +41,7 @@ Built entirely using frontend technologies, the platform combines premium UI/UX 
 
 ## Developer [ AUTHOR ]
 
-Made by **Premamoyee**
+Made by **Premomayee**
 
 Portfolio:
 https://premomayee.netlify.app/
@@ -70,5 +70,5 @@ https://premomayee.netlify.app/
 If you like this project, consider giving it a **star ⭐** on GitHub.  
 It helps support future projects and motivates further development.
 
-                    - PREMAMOYEE
+                    - PREMOMAYEE
 ---
