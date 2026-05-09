@@ -1,4 +1,4 @@
-# ♔ CODINGHUB
+# CODINGHUB
 
 Premium AI-powered coding education platform with futuristic UI, intelligent chatbot integration, modern learning resources, and interactive developer experience.
 
@@ -14,7 +14,7 @@ Built entirely using frontend technologies, the platform combines premium UI/UX 
 
 ## Live Demo
 
-👉 https://premomayee.netlify.app/
+👉 https://codexa-hub.netlify.app/
 
 ---
 
